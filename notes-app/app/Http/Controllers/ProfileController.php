@@ -7,12 +7,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Affiche la page de profil.
      */
     public function edit(Request $request): View
     {
@@ -22,7 +23,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Met à jour les infos utilisateur (nom, email...).
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -38,7 +39,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Supprime le compte utilisateur.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -50,11 +51,42 @@ class ProfileController extends Controller
 
         Auth::logout();
 
+        // Supprimer avatar si présent
+        if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
+            Storage::disk('public')->delete($user->avatar_path);
+        }
+
         $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * Met à jour l'image de profil (avatar).
+     */
+    public function updateAvatar(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $user = Auth::user();
+
+        // Supprime l'ancien avatar s’il existe
+        if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
+            Storage::disk('public')->delete($user->avatar_path);
+        }
+
+        // Stocke le nouveau
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        // Met à jour le chemin dans la base
+        $user->avatar_path = $path;
+        $user->save();
+
+        return back()->with('status', 'avatar-updated');
     }
 }

@@ -14,6 +14,9 @@ Route::get('/dashboard', function () {
 Route::post('/notes/reorder', [NoteController::class, 'reorder'])->name('notes.reorder');
 Route::post('/notes/{note}/pin', [NoteController::class, 'togglePin'])->name('notes.togglePin');
 Route::post('/notes/{note}/position', [NoteController::class, 'updatePosition'])->name('notes.updatePosition');
+Route::post('/profile/avatar', [App\Http\Controllers\ProfileController::class, 'updateAvatar'])
+    ->name('profile.avatar')
+    ->middleware('auth');
 Route::middleware(['auth'])->group(function () {
     Route::post('/notes/{note}/position', [NoteController::class, 'updatePosition'])->name('notes.updatePosition');
 });

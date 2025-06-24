@@ -1,3 +1,4 @@
+@section('title', 'Accueil - NotesApp')
 @extends('layouts.app')
 
 @section('content')
@@ -14,14 +15,12 @@
     @endphp
 
     <style>
-        /* Conteneur principal en relative pour le positionnement absolu */
         #notes-container {
             position: relative;
-            min-height: 80vh; /* assez de place */
+            min-height: 80vh;
             padding: 20px;
         }
 
-        /* Style des post-it */
         .note-card {
             position: absolute;
             width: 280px;
@@ -42,8 +41,31 @@
             cursor: grabbing;
             box-shadow: 0 8px 16px rgb(0 0 0 / 0.3);
         }
-    </style>
 
+        /* Responsive sans toucher aux couleurs */
+        @media (max-width: 639px) {
+            #notes-container {
+                position: static;
+                min-height: auto;
+                padding: 10px;
+            }
+
+            .note-card {
+                position: static !important;
+                width: auto !important;
+                min-height: auto;
+                margin-bottom: 1.5rem;
+                cursor: default;
+                user-select: text;
+                box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+            }
+
+            .note-card:active {
+                cursor: default;
+                box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+            }
+        }
+    </style>
     <div class="max-w-full mx-auto mt-8 px-6">
         <div class="flex items-center justify-between mb-10">
             <h1 class="text-4xl font-bold text-gray-800 tracking-tight">📚 Mes notes</h1>
@@ -58,12 +80,10 @@
             </a>
         </div>
 
-        {{-- Conteneur pour les notes en position absolue --}}
         <div id="notes-container" class="relative">
             @forelse ($notes as $note)
                 @php
                     $color = $colors[$loop->index % count($colors)];
-                    // Défaut si pas de position
                     $x = $note->x_position ?? (100 + $loop->index * 30);
                     $y = $note->y_position ?? (100 + $loop->index * 30);
                 @endphp
@@ -110,13 +130,14 @@
         </div>
     </div>
 
-    {{-- JS pour drag & drop libre --}}
     <script>
         document.querySelectorAll('.note-card').forEach(card => {
             let isDragging = false;
             let startX, startY, initialLeft, initialTop;
 
             card.addEventListener('mousedown', e => {
+                if (window.innerWidth < 640) return;
+
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
@@ -141,7 +162,6 @@
                 card.style.cursor = 'grab';
                 card.style.zIndex = '';
 
-                // Enregistrer la nouvelle position via fetch
                 const id = card.dataset.id;
                 const left = parseInt(card.style.left, 10);
                 const top = parseInt(card.style.top, 10);
@@ -166,7 +186,6 @@
             });
         });
 
-        // Gestion épingle (toggle épingle sans déplacer)
         document.querySelectorAll('.pin-form').forEach(form => {
             form.addEventListener('submit', e => {
                 e.preventDefault();
@@ -188,7 +207,6 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            // Toggle icône épingle
                             button.textContent = button.textContent === '📌' ? '📍' : '📌';
                         } else {
                             alert('Erreur lors du toggle épingle.');
