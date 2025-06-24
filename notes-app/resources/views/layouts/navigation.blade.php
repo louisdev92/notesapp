@@ -8,9 +8,13 @@
             <!-- Logo à gauche -->
             <div class="flex-shrink-0 flex items-center">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
+                    <!-- Icône de carnet -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10M7 8h10M7 12h4m-4 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                     <span class="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white select-none">
-                        NotesApp
-                    </span>
+            NotesApp
+        </span>
                 </a>
             </div>
 
