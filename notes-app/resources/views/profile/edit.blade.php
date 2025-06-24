@@ -89,7 +89,7 @@
 
                         <label
                             for="avatarInput"
-                            class="relative cursor-pointer rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-indigo-500 shadow-lg w-36 h-36 flex items-center justify-center overflow-hidden"
+                            class="relative cursor-pointer rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-indigo-500 shadow-lg w-45 h-45 flex items-center justify-center overflow-hidden"
                             title="Cliquez ou glissez une image pour changer votre avatar"
                             ondragover="event.preventDefault(); this.classList.add('ring', 'ring-4', 'ring-indigo-500')"
                             ondragleave="event.preventDefault(); this.classList.remove('ring', 'ring-4', 'ring-indigo-500')"
