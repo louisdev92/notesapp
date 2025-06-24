@@ -13,8 +13,7 @@
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 @auth
                     <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-700 dark:text-gray-200">Bonjour, {{ Auth::user()->name }}</span>
-                        <a href="{{ route('profile.edit') }}" class="text-sm text-blue-600 dark:text-blue-400">Profil</a>
+                        <a href="{{ route('profile.edit') }}" class="text-sm text-blue-600 dark:text-blue-400">{{ Auth::user()->name }}</a>
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

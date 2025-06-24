@@ -1,45 +1,71 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-4xl mx-auto mt-10 px-4">
-        <h1 class="text-3xl font-extrabold mb-6 text-gray-800">📚 Mes notes</h1>
+    @php
+        // Couleurs post-it pastel (fond + bordure)
+        $colors = [
+            'bg-yellow-100 border-yellow-200',
+            'bg-green-100 border-green-200',
+            'bg-pink-100 border-pink-200',
+            'bg-blue-100 border-blue-200',
+            'bg-purple-100 border-purple-200',
+            'bg-orange-100 border-orange-200',
+            'bg-lime-100 border-lime-200',
+        ];
+    @endphp
 
-        {{-- Bouton créer une note --}}
-        <a href="{{ route('notes.create') }}"
-           class="inline-block bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
-            ➕ Nouvelle note
-        </a>
+    <div class="max-w-5xl mx-auto mt-12 px-6">
+        {{-- En-tête --}}
+        <div class="flex items-center justify-between mb-10">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white tracking-tight">📚 Mes notes</h1>
+
+            {{-- Bouton Ajouter --}}
+            <a href="{{ route('notes.create') }}"
+               class="inline-flex items-center gap-2 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 hover:scale-105">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Ajouter une note
+            </a>
+        </div>
 
         {{-- Liste des notes --}}
-        <div class="mt-8 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @forelse ($notes as $note)
-                <div class="border border-gray-200 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition">
-                    <h2 class="text-2xl font-bold text-gray-900">{{ $note->title }}</h2>
-                    <p class="mt-3 text-gray-700 whitespace-pre-line">
+                @php
+                    $color = $colors[array_rand($colors)];
+                @endphp
+
+                <div class="rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border {{ $color }}">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $note->title }}</h2>
+                    <p class="text-gray-800 whitespace-pre-line mb-4">
                         {{ $note->content ?: 'Pas de contenu' }}
                     </p>
 
-                    <div class="mt-4 flex space-x-4">
+                    <div class="flex justify-end gap-4">
                         {{-- Modifier --}}
                         <a href="{{ route('notes.edit', $note) }}"
-                           class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition">
+                           class="text-indigo-600 hover:text-indigo-800 font-medium transition">
                             ✏️ Modifier
                         </a>
 
                         {{-- Supprimer --}}
-                        <form action="{{ route('notes.destroy', $note) }}" method="POST" class="inline-block"
+                        <form action="{{ route('notes.destroy', $note) }}" method="POST"
                               onsubmit="return confirm('Supprimer cette note ?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
-                                    class="inline-flex items-center text-red-600 hover:text-red-800 font-medium transition">
+                                    class="text-red-600 hover:text-red-800 font-medium transition">
                                 🗑️ Supprimer
                             </button>
                         </form>
                     </div>
                 </div>
             @empty
-                <p class="text-gray-500 italic mt-6">Vous n'avez encore rédigé aucune note.</p>
+                <div class="col-span-full text-center text-gray-500 dark:text-gray-400 italic mt-8">
+                    Vous n'avez encore rédigé aucune note.
+                </div>
             @endforelse
         </div>
     </div>
