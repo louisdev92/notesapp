@@ -85,46 +85,81 @@
                     </div>
 
                     {{-- Avatar et Upload --}}
-                    <div class="sm:w-1/3 w-full flex items-center justify-center sm:justify-end">
-                        <div class="text-center space-y-4">
-                            <div class="rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-indigo-500 shadow-lg inline-block">
-                                <img
-                                    src="{{ $avatarUrl }}"
-                                    alt="Avatar de {{ Auth::user()->name }}"
-                                    class="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-gray-800 transition-transform duration-300 hover:scale-105"
-                                    loading="lazy"
-                                    onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=128&background=random&color=fff';"
-                                />
+                    <div class="sm:w-1/3 w-full flex flex-col items-center justify-center sm:justify-end space-y-6">
+
+                        <label
+                            for="avatarInput"
+                            class="relative cursor-pointer rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-indigo-500 shadow-lg w-36 h-36 flex items-center justify-center overflow-hidden"
+                            title="Cliquez ou glissez une image pour changer votre avatar"
+                            ondragover="event.preventDefault(); this.classList.add('ring', 'ring-4', 'ring-indigo-500')"
+                            ondragleave="event.preventDefault(); this.classList.remove('ring', 'ring-4', 'ring-indigo-500')"
+                            ondrop="event.preventDefault();
+                                    this.classList.remove('ring', 'ring-4', 'ring-indigo-500');
+                                    const input = document.getElementById('avatarInput');
+                                    if (event.dataTransfer.files.length) {
+                                        input.files = event.dataTransfer.files;
+                                        input.dispatchEvent(new Event('change'));
+                                    }"
+                        >
+                            <img
+                                id="avatarPreview"
+                                src="{{ $avatarUrl }}"
+                                alt="Avatar de {{ Auth::user()->name }}"
+                                class="w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800 transition-transform duration-300 hover:scale-110"
+                                loading="lazy"
+                                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=128&background=random&color=fff';"
+                            />
+                            <div
+                                id="uploadOverlay"
+                                class="absolute inset-0 bg-black bg-opacity-30 rounded-full flex flex-col items-center justify-center text-white opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0-8l-3 3m3-3l3 3M16 8a4 4 0 10-8 0v4h8V8z" />
+                                </svg>
+                                <span class="text-sm font-semibold select-none">Changer</span>
                             </div>
+                        </label>
 
-                            {{-- Affichage des erreurs globales --}}
-                            @if ($errors->any())
-                                <div class="mb-4 text-red-600">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
+                        {{-- Affichage erreurs --}}
+                        @if ($errors->any())
+                            <div class="mb-4 text-red-600 text-center">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        {{-- Formulaire upload --}}
+                        <form method="POST" action="{{ route('profile.avatar') }}" enctype="multipart/form-data" class="w-full max-w-xs text-center">
+                            @csrf
+                            @method('PATCH')
+
+                            <input
+                                type="file"
+                                id="avatarInput"
+                                name="avatar"
+                                accept="image/*"
+                                class="hidden"
+                                required
+                            />
+
+                            <button
+                                type="submit"
+                                id="avatarSubmit"
+                                class="mt-4 w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md shadow hover:from-purple-700 hover:to-blue-700 transition-opacity duration-300 opacity-50 cursor-not-allowed"
+                                disabled
+                            >
+                                Changer l’image
+                            </button>
+
+                            @if (session('status') === 'avatar-updated')
+                                <p class="mt-3 text-green-600 dark:text-green-400 font-semibold animate-fadeIn">
+                                    Avatar mis à jour !
+                                </p>
                             @endif
-
-                            {{-- Formulaire upload avatar --}}
-                            <form method="POST" action="{{ route('profile.avatar') }}" enctype="multipart/form-data" class="space-y-2">
-                                @csrf
-                                {{-- Si ça ne marche pas, essaie sans la méthode PATCH --}}
-                                @method('PATCH')
-
-                                <input type="file" name="avatar" accept="image/*" class="text-sm text-gray-700 dark:text-gray-200" required>
-
-                                <button type="submit" class="w-full px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">
-                                    Changer l’image
-                                </button>
-
-                                @if (session('status') === 'avatar-updated')
-                                    <p class="text-sm text-green-600 dark:text-green-400">Avatar mis à jour !</p>
-                                @endif
-                            </form>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -145,4 +180,37 @@
 
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const avatarInput = document.getElementById('avatarInput');
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarSubmit = document.getElementById('avatarSubmit');
+
+            avatarInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) {
+                    avatarSubmit.disabled = true;
+                    avatarSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                    return;
+                }
+
+                if (!file.type.startsWith('image/')) {
+                    alert('Veuillez sélectionner un fichier image valide.');
+                    avatarInput.value = '';
+                    avatarSubmit.disabled = true;
+                    avatarSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    avatarPreview.src = event.target.result;
+                    avatarSubmit.disabled = false;
+                    avatarSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
 @endsection
