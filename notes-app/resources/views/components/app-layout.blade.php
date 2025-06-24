@@ -14,13 +14,13 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+<body class="font-sans antialiased bg-gray-50 text-gray-900 transition-colors duration-300">
 <div class="min-h-screen flex flex-col">
     @include('layouts.navigation')
 
     <!-- Header -->
     @isset($header)
-        <header class="bg-white dark:bg-gray-800 shadow-md">
+        <header class="bg-white shadow-md">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 {{ $header }}
             </div>
@@ -32,7 +32,7 @@
         {{ $slot }}
     </main>
 
-    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+    <footer class="bg-white border-t border-gray-200 text-center py-4 text-sm text-gray-500">
         &copy; {{ date('Y') }} {{ config('app.name', 'Laravel') }}. Tous droits réservés.
     </footer>
 </div>
