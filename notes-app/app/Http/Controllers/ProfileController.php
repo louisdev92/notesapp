@@ -27,13 +27,14 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -49,13 +50,15 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // Déconnexion avant suppression
         Auth::logout();
 
-        // Supprimer avatar si présent
+        // Supprime l'avatar si existant
         if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
             Storage::disk('public')->delete($user->avatar_path);
         }
 
+        // Supprime l'utilisateur
         $user->delete();
 
         $request->session()->invalidate();
@@ -69,18 +72,23 @@ class ProfileController extends Controller
      */
     public function updateAvatar(Request $request): RedirectResponse
     {
-        $request->validate([
-            'avatar' => ['required', 'image', 'max:2048'],
-        ]);
-
-        $user = Auth::user();
-
-        // Supprime l'ancien avatar s’il existe
-        if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
-            Storage::disk('public')->delete($user->avatar_path);
+        // Vérifie bien que le fichier est reçu
+        if (!$request->hasFile('avatar')) {
+            return back()->withErrors(['avatar' => 'Aucun fichier reçu']);
         }
 
-        // Stocke le nouveau
+        $request->validate([
+            'avatar' => ['required', 'image', 'max:2048'], // max 2 Mo
+        ]);
+
+        $user = $request->user();
+
+        // Supprime l'ancien avatar s’il existe
+        if ($user->avatar_path && \Storage::disk('public')->exists($user->avatar_path)) {
+            \Storage::disk('public')->delete($user->avatar_path);
+        }
+
+        // Stocke le nouveau avatar dans "storage/app/public/avatars"
         $path = $request->file('avatar')->store('avatars', 'public');
 
         // Met à jour le chemin dans la base

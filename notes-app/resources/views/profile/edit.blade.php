@@ -18,9 +18,11 @@
                 $gender = property_exists(Auth::user(), 'gender') ? strtolower(Auth::user()->gender) : 'men';
                 if (!in_array($gender, ['men', 'women'])) $gender = 'men';
 
-                $avatarUrl = Auth::user()->avatar_path
-                    ? asset('storage/' . Auth::user()->avatar_path)
-                    : "https://randomuser.me/api/portraits/{$gender}/{$avatarId}.jpg";
+                if (Auth::user()->avatar_path) {
+                    $avatarUrl = asset('storage/' . Auth::user()->avatar_path);
+                } else {
+                    $avatarUrl = "https://randomuser.me/api/portraits/{$gender}/{$avatarId}.jpg";
+                }
             @endphp
 
             {{-- Section informations utilisateur --}}
@@ -95,14 +97,28 @@
                                 />
                             </div>
 
+                            {{-- Affichage des erreurs globales --}}
+                            @if ($errors->any())
+                                <div class="mb-4 text-red-600">
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            {{-- Formulaire upload avatar --}}
                             <form method="POST" action="{{ route('profile.avatar') }}" enctype="multipart/form-data" class="space-y-2">
                                 @csrf
+                                {{-- Si ça ne marche pas, essaie sans la méthode PATCH --}}
                                 @method('PATCH')
 
                                 <input type="file" name="avatar" accept="image/*" class="text-sm text-gray-700 dark:text-gray-200" required>
-                                <x-input-error :messages="$errors->get('avatar')" class="mt-1" />
 
-                                <x-secondary-button class="w-full">Changer l’image</x-secondary-button>
+                                <button type="submit" class="w-full px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">
+                                    Changer l’image
+                                </button>
 
                                 @if (session('status') === 'avatar-updated')
                                     <p class="text-sm text-green-600 dark:text-green-400">Avatar mis à jour !</p>
